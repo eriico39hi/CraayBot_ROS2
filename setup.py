@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'craaybot = craaybot_ros2.craaybot:main'
+            'serialbr = craaybot_ros2.serialbr_pid:main'
         ],
     },
 )
