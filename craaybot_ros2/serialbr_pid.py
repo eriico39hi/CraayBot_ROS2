@@ -71,23 +71,33 @@ class SerialBridge(Node):
 
         
         #PID tuning vals as ROS parameters
-        self.declare_parameter('kp',20)
-        self.declare_parameter('ki',0.1)
-        self.declare_parameter('kd',5.0)
+        #These defaults were derived from manual tuning
+        self.declare_parameter('lkp',4.2)
+        self.declare_parameter('lki',0.22)
+        self.declare_parameter('lkd',0.11)
         
-        kp = self.get_parameter('kp').value
-        ki = self.get_parameter('ki').value
-        kd = self.get_parameter('kd').value
+        self.declare_parameter('rkp',4.2)
+        self.declare_parameter('rki',0.15)
+        self.declare_parameter('rkd',0.11)
         
-        self.get_logger().info(f"PID Gains: Kp = {kp}, Ki = {ki}, Kd = {kd}")
+        lkp = self.get_parameter('lkp').value
+        lki = self.get_parameter('lki').value
+        lkd = self.get_parameter('lkd').value
+        
+        rkp = self.get_parameter('rkp').value
+        rki = self.get_parameter('rki').value
+        rkd = self.get_parameter('rkd').value
+        
+        self.get_logger().info(f"Left PID Gains: Kp = {lkp}, Ki = {lki}, Kd = {lkd}")
+        self.get_logger().info(f"Right PID Gains: Kp = {rkp}, Ki = {rki}, Kd = {rkd}")
 
         #ROS setup - pubs encoder data, subscribes to "drive_command" and does callback upon receiving one
         self.pub = self.create_publisher(JointState, 'joint_states', 10)
         self.sub = self.create_subscription(Float32MultiArray, 'speed', self.speed_callback, 10)
         
         #PID controllers for each wheel (same gains for now)
-        self.leftpid = PIDController(kp,ki,kd,MAX_INT)
-        self.rightpid = PIDController(kp,ki,kd,MAX_INT)
+        self.leftpid = PIDController(lkp,lki,lkd,MAX_INT)
+        self.rightpid = PIDController(rkp,rki,rkd,MAX_INT)
         
         #Allow live parameter updates
         self.add_on_set_parameters_callback(self.on_param_change)
@@ -111,20 +121,27 @@ class SerialBridge(Node):
     def on_param_change(self, params):
         
         for param in params:
-            if param.name == 'kp':
+            if param.name == 'lkp':
                 self.leftpid.kp = param.value
-                self.rightpid.kp = param.value
-            elif param.name == 'ki':
+            elif param.name == 'lki':
                 self.leftpid.ki = param.value
-                self.rightpid.ki = param.value
-            elif param.name == 'kd':
+            elif param.name == 'lkd':
                 self.leftpid.kd = param.value
+            elif param.name == 'rkp':
+                self.rightpid.kp = param.value
+            elif param.name == 'rki':
+                self.rightpid.ki = param.value
+            elif param.name == 'rkd':
                 self.rightpid.kd = param.value
                 
-        kp = self.leftpid.kp
-        ki = self.leftpid.ki
-        kd = self.leftpid.kd
-        self.get_logger().info(f"PID Gains: Kp = {kp}, Ki = {ki}, Kd = {kd}")
+        lkp = self.leftpid.kp
+        lki = self.leftpid.ki
+        lkd = self.leftpid.kd
+        rkp = self.rightpid.kp
+        rki = self.rightpid.ki
+        rkd = self.rightpid.kd
+        self.get_logger().info(f"Left PID Gains: Kp = {lkp}, Ki = {lki}, Kd = {lkd}")
+        self.get_logger().info(f"Right PID Gains: Kp = {rkp}, Ki = {rki}, Kd = {rkd}")
 
         return SetParametersResult(successful = True)
 
