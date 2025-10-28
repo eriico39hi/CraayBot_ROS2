@@ -21,9 +21,11 @@ class Kinematics(Node):
         super().__init__('kinematics')
         
         #publish topics
-        self.twistpub = self.create_publisher(Twist, 'robot_velocity', 10)
+        self.twistrbpub = self.create_publisher(Twist, 'robot_velocity', 10)
+        self.wheelspdsp = self.create_publisher(Float32MultiArray, 'speed', 10)
         
         #subscribe to topics
+        self.twistcmdsub = self.create_subscribtion(Twist, 'robot_velocity_sp', self.cmd_callback, 10)
         self.jointsub = self.create_subscription(JointState, 'joint_states', self.joint_callback, 10)
         
         self.get_logger().info("Kinematics node started")
@@ -57,7 +59,18 @@ class Kinematics(Node):
         twistmsg = Twist()
         twistmsg.linear.x = v
         twistmsg.angular.z = w
-        self.twistpub.publish(twistmsg)  
+        self.twistrbpub.publish(twistmsg)
+        
+    def cmd_callback(self, msg: Twist)
+        
+        vsp = msg.linear.x
+        wsp = msg.angular.z
+        
+        lspdsp, rspdsp = self.inverse_kinematics(v,w)
+        
+        wheelmsg = Float32MultiArray()
+        wheelmsg.data = [lspdsp, rspdsp]
+        self.wheelspdsp.publish(wheelmsg)
         
     
 
