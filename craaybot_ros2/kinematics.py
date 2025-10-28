@@ -11,14 +11,55 @@ from geometry_msgs.msg import Pose
 from sensor_msgs.msg import JointState
 
 #Constants
-WHEEL_DIA = 69 #mm
-ROBOT_W = 220.5 #mm, center to center
+WHEEL_DIA = 0.069 #m
+WHEEL_R = WHEEL_DIA / 2
+ROBOT_W = 0.2205 #m, center to center
 
 #Kinematics class
 class Kinematics(Node):
     def __init__(self):
         super().__init__('kinematics')
-        self.get_logger().info("Kinematics node started")       
+        
+        #publish topics
+        self.twistpub = self.create_publisher(Twist, 'robot_velocity', 10)
+        
+        #subscribe to topics
+        self.jointsub = self.create_subscription(JointState, 'joint_states', self.joint_callback, 10)
+        
+        self.get_logger().info("Kinematics node started")
+
+    def inverse_kinematics(self,linearvel,angularvel):
+        
+    
+        vleft_sp = (linearvel - (angularvel * ROBOT_W / 2.0))
+        vright_sp = (linearvel + (angularvel * ROBOT_W / 2.0))
+        
+        wleft_sp = vleft_sp / WHEEL_R
+        wright_sp = vright_sp / WHEEL_R
+        
+        return wleft_sp, wright_sp
+    
+    def forward_kinematics(self,wleft,wright):
+        leftlinvel_rb = WHEEL_R * wleft
+        rightlinvel_rb = WHEEL_R * wright
+    
+        linearv_rb = (leftlinvel_rb + rightlinvel_rb) / 2.0
+        angularv_rb = (leftlinvel_rb - rightlinvel_rb) / ROBOT_W
+        return linearv_rb, angularv_rb
+        
+    def joint_callback(self, msg: JointState):
+    
+        wleft_rb = msg.velocity[0]
+        wright_rb = msg.velocity[1]
+        
+        v,w = self.forward_kinematics(wleft_rb, wright_rb)
+        
+        twistmsg = Twist()
+        twistmsg.linear.x = v
+        twistmsg.angular.z = w
+        self.twistpub.publish(twistmsg)  
+        
+    
 
     #stops cleanly if ROS shuts down (standard practice)
     def destroy_node(self):
