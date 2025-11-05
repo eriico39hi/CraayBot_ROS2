@@ -21,7 +21,9 @@ setup(
     entry_points={
         'console_scripts': [
             'serialbr = craaybot_ros2.serialbr_pid:main',
-            'kinematics = craaybot_ros2.kinematics:main'
+            'kinematics = craaybot_ros2.kinematics:main',
+            'odometry = craaybot_ros2.odometry:main',
+            'move = craaybot_ros2.move:main'
         ],
     },
 )

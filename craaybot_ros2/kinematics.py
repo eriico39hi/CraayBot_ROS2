@@ -7,7 +7,6 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import Twist
-from geometry_msgs.msg import Pose
 from sensor_msgs.msg import JointState
 
 #Constants
@@ -76,8 +75,8 @@ class Kinematics(Node):
 
     #stops cleanly if ROS shuts down (standard practice)
     def destroy_node(self):
-        super().destroy_node()
-
+        super().destroy_node()        
+        
 #starts the node and keeps it alive with spin. kills it on ctrl+c
 def main(args=None):
     rclpy.init(args=args)

@@ -102,11 +102,11 @@ class SerialBridge(Node):
         #Allow live parameter updates
         self.add_on_set_parameters_callback(self.on_param_change)
         
-        #init speeds
+        #init speeds set points
         self.leftsetspeed = 0.0
         self.rightsetspeed = 0.0
         
-        #init velocities
+        #init speeds read backs
         self.leftspeed = 0.0
         self.rightspeed = 0.0
         
@@ -205,9 +205,13 @@ class SerialBridge(Node):
                         #self.get_logger().info(f"Encoders:" + line)
                         
                         #Using JointState msg type for this, name set here, also get timestamp
-                        curtime = self.get_clock().now().nanoseconds/1e9
+                        curtimeros = self.get_clock().now()
+                        curtime = curtimeros.nanoseconds/1e9
+                                                
                         msg = JointState()
+                        msg.header.stamp = curtimeros.to_msg()
                         msg.name = ['left_wheel', 'right_wheel']
+                        
                         
                         #convert string to 2 numbers, then convert counts to rad, store in 'position'
                         leftenc,rightenc = [int(x) for x in line.split(',')]
