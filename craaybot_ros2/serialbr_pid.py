@@ -1,3 +1,6 @@
+#This node functions as a bridge to the Arduino. Sends PWM values for wheels, receives encoder values
+#It also contains the PID Controller for closed loop velocity control
+
 #Imports
 import rclpy
 from rclpy.node import Node
