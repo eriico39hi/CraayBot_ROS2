@@ -1,6 +1,6 @@
 #This node will input set linear and angular velocities, convert to wheel rad/s and send to
-#serialbr/PID which will convert to PWM% for each wheel (forward kinematic)
-#reads back JointStates (enc pos in rad, enc vel in rad/s) converts this to Twist (inverse kinematic)
+#serialbr/PID which will convert to PWM% for each wheel (inverse kinematic)
+#reads back JointStates (enc pos in rad, enc vel in rad/s) converts this to Twist (forward kinematic)
 
 #Imports
 import rclpy
